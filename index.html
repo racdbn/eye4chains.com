@@ -6,16 +6,23 @@
   
 </head>
 <body>
-	<button onclick="revealMessage()">Click me!</button>
+	<!-- <button onclick="revealMessage()">Click me!</button> -->
+	
 	From address (Example: your address) 
+	<br>
 	<input type="text" id="fromAddress" placeholder="cB7dA2CdA654B29Fba272DA622AC96cbF1eA59b5" value="cB7dA2CdA654B29Fba272DA622AC96cbF1eA59b5" size="50">
 	<br>
 	To address (Example: casino address) 
-	<input type="text" id="toAddress" placeholder="0x3c1727C283370e476a63768C7cAb843B8bd63130" value="0x3c1727C283370e476a63768C7cAb843B8bd63130" size="50">
-	<div id="hiddenMessage" style="display:none">
-		<p>Bla-bla</p>
-		<button id="countDownButton" onclick= "countDown(window.config)">10</button>
-	</div>
+	<br>
+	<input type="text" id="toAddress" placeholder="0x3c1727C283370e476a63768C7cAb843B8bd63130 0xDf8DD5e0b4168f20a3488Ad088dDB198fE602Cb3" value="0x3c1727C283370e476a63768C7cAb843B8bd63130 0xDf8DD5e0b4168f20a3488Ad088dDB198fE602Cb3" size="50">
+	<!--<div id="hiddenMessage" style="display:block"> -->
+	<p>If you put multiple addresses in a field separated by spaces or commas this should work too.</p>
+	The number of days to check for transactions (Examples: 10 -> last 10 days, 0.25 -> last 6 hours)
+	<br>
+	<input type="text" id="daysToCheck" placeholder="7" value="7">
+	<br>
+	<button id="countDownButton" onclick= "countDown(window.config)">Get the graph</button>
+	<!--</div> -->
 	<div id="chart_div"></div>
 	<div id="selected-data"></div>
 	<p id="myParagraph"></p>

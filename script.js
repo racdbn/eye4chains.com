@@ -33,31 +33,33 @@ async function countDown(config){
 	 
 	
 	var currentVal = document.getElementById("countDownButton").innerHTML;
-	var newVal = currentVal - 1;
-	document.getElementById("countDownButton").innerHTML = newVal;
+	//var newVal = currentVal - 1;
+	//document.getElementById("countDownButton").innerHTML = newVal;
+	document.getElementById('selected-data').textContent = "Now it will be loading for some time. (For each address I request all tether transfer transactions from the EtherScan to find the relevant ones.  And EtherScan only gives us 10000 transaction at a time and has a 0.21 sec calldown. Maybe one day we will have our own nodes. But atm we can't since those bitches are giant in storage and bandwidth.)"
 	
 	reqts = []
 	req1 = {};
 	
 	fromAddress = document.getElementById("fromAddress").value;
 	toAddress = document.getElementById("toAddress").value;
+	daysToCheck = document.getElementById("daysToCheck").value;
 	
-	if(fromAddress.startsWith("0x") || fromAddress.startsWith("0X"))
-		fromAddress = fromAddress.substring(2)
-	if(toAddress.startsWith("0x") || toAddress.startsWith("0X"))
-		toAddress = toAddress.substring(2)
+	//if(fromAddress.startsWith("0x") || fromAddress.startsWith("0X"))
+	//	fromAddress = fromAddress.substring(2)
+	//if(toAddress.startsWith("0x") || toAddress.startsWith("0X"))
+	//	toAddress = toAddress.substring(2)
 	
 	//req1["fromAddress"] = "cB7dA2CdA654B29Fba272DA622AC96cbF1eA59b5";
 	
-	req1["fromAddress"] = fromAddress
-	req1["toAddress"] =  toAddress
-	req1["direction"] = "out";
-	reqts.push(req1);
-	req2 = {};
-	req2["fromAddress"] = toAddress;
-	req2["toAddress"] = fromAddress;
-	req2["direction"] = "in";
-	reqts.push(req2);
+	//req1["fromAddress"] = fromAddress
+	//req1["toAddress"] =  toAddress
+	//req1["direction"] = "out";
+	//reqts.push(req1);
+	//req2 = {};
+	//req2["fromAddress"] = toAddress;
+	//req2["toAddress"] = fromAddress;
+	//req2["direction"] = "in";
+	//reqts.push(req2);
 	
 	totRes = ""
 	console.log("Pre loop");
@@ -69,7 +71,7 @@ async function countDown(config){
 		url = "http://" + config.backendIP +  ":" + config.backendPort + "/getTr";
 		try 
 		{
-			const data222 = { fromAddress: fromAddress, toAddress: toAddress };
+			const data222 = { fromAddress: fromAddress, toAddress: toAddress, daysToCheck: daysToCheck};
 			
 			const response = await fetch(url, 
 			{
@@ -97,7 +99,9 @@ async function countDown(config){
 			for (let i = 0; i < savedTrans.length; i++)
 			{
 				tr = savedTrans[i]
-				SSS = tr["direction"] + " " + JSON.stringify(tr["ammountSent"]) + "( time = " +  JSON.stringify(tr["timeStamp"]) + ")";
+				dt = (new Date(tr["timeStamp"] * 1000)).toString()
+				SSS = tr["direction"] + " " + JSON.stringify(tr["ammountSent"]) + ", time = " +  JSON.stringify(tr["timeStamp"]) +  "(UNIX) = " + dt + ", from = " + tr["from"].toString().substring(0,7) + ", to = " + tr["to"].toString().substring(0,7) + ", hash = " + tr["hash"];
+ 
 				console.log(SSS);
 				resStr = resStr + SSS + "<br>";
 				console.log(tr["direction"])
@@ -158,16 +162,26 @@ async function countDown(config){
 				  var selectedValue = data.getValue(selectedRow, 1);
 
 				  // Display the selected data in the "selected-data" div
-				  document.getElementById('selected-data').textContent = "Selected Date: " + selectedDate.toLocaleDateString() + 
-																	  "\nSelected Value: " + selectedValue;
+				  
+				  tr = savedTrans[selection[0].row] 
+				  dt = (new Date(tr["timeStamp"] * 1000)).toString()
+				  SSS = tr["direction"] + " " + JSON.stringify(tr["ammountSent"]) + ", time = " +  JSON.stringify(tr["timeStamp"]) +  "(UNIX) = " + dt + ", from = " + tr["from"].toString().substring(0,7) + ", to = " + tr["to"].toString().substring(0,7) + ", hash = " + tr["hash"];
+				  
+				  document.getElementById('selected-data').innerHTML = "Total: " + selectedValue + "<br> Transaction info:" + SSS + "<br> All transaction data = " + JSON.stringify(tr);
 				}
 			  });
 
 			  chart.draw(data, options);
+			  
+			  
+			  
+			  
+			  
 			
-			
+			document.getElementById('selected-data').textContent = "";			
 			const paragraph = document.getElementById("myParagraph");
-			paragraph.innerHTML = "<p>All transactions!" + reqts[1]["fromAddress"] + "<br>" + resStr + "</p>";
+			//paragraph.innerHTML = "<p>All transactions!" + reqts[1]["fromAddress"] + "<br>" + resStr + "</p>";
+			paragraph.innerHTML = "<p>All transactions!" + "<br>" + resStr + "</p>";
 			
 		} 
 		catch (error) {
@@ -195,7 +209,9 @@ async function countDown(config){
 	}	
 	else
 	{
+		
 		replies = []
+		/*
 		const urls = []
 		for(let i = 0; i < reqts.length; i++)
 		{
@@ -284,7 +300,8 @@ async function countDown(config){
 		for (let i = 0; i < savedTrans.length; i++)
 		{
 			tr = savedTrans[i]
-			SSS = tr["direction"] + " " + JSON.stringify(tr["ammountSent"]) + "( time = " +  JSON.stringify(tr["timeStamp"]) + ")";
+			dt = (new Date(tr["timeStamp"] * 1000)).toString()
+			SSS = tr["direction"] + " " + JSON.stringify(tr["ammountSent"]) + "( time = " +  JSON.stringify(tr["timeStamp"]) +  "(UNIX) = " + dt + ")" + ", from = " + tr["from"] + ", to = " + tr["to"] + ",hash = " + tr["hash"];
 			console.log(SSS);
 			resStr = resStr + SSS + "<br>";
 			console.log(tr["direction"])
@@ -298,6 +315,7 @@ async function countDown(config){
 				console.log("indeed in")
 				sum += tr["ammountSent"];
 			}
+			
 			SSS = "sum = " + sum.toString()
 			tr["sum"] = sum
 			console.log(SSS)
@@ -329,9 +347,9 @@ async function countDown(config){
 			title: 'Cumulative winnings',
 			curveType: 'function',
 			legend: { position: 'bottom' },
-			pointSize: 5,  // Increase the size of data points
-			pointShape: 'circle', // Choose a shape for the points
-			pointColor: 'red', // Set the color of the points
+			pointSize: 5,   
+			pointShape: 'circle',  
+			pointColor: 'red', 
 			height: 400
 		  };
 
@@ -344,7 +362,7 @@ async function countDown(config){
 			  var selectedDate = data.getValue(selectedRow, 0);
 			  var selectedValue = data.getValue(selectedRow, 1);
 
-			  // Display the selected data in the "selected-data" div
+			   
 			  document.getElementById('selected-data').textContent = "Selected Date: " + selectedDate.toLocaleDateString() + 
 																  "\nSelected Value: " + selectedValue;
 			}
@@ -352,8 +370,9 @@ async function countDown(config){
 
 		  chart.draw(data, options);
 		
-		
+		document.getElementById('selected-data').textContent = "";
 		const paragraph = document.getElementById("myParagraph");
 		paragraph.innerHTML = "<p>All transactions!" + reqts[1]["fromAddress"] + "<br>" + resStr + "</p>";
+		*/
 	}
 }
