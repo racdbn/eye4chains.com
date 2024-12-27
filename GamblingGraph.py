@@ -4,7 +4,7 @@ import json
 import sys
 import os 
  
-sys.path.insert(0, os.path.abspath("C:\\Users\\racdbn\\Desktop\\DesktopShit\\GamblingGraph4GitHub"))
+sys.path.insert(0, os.path.abspath(".."))
 from secretsGG import *
  
 import time 
