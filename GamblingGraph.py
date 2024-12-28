@@ -18,6 +18,8 @@ ETHERSCAN_SLEEP_BETWEEN_REQUESTS_SECS = os.environ.get('ETHERSCAN_SLEEP_BETWEEN_
 
 GAMBLING_GRAPH_BACKEND_PORT = os.environ.get('GAMBLING_GRAPH_BACKEND_PORT', GAMBLING_GRAPH_BACKEND_PORT)  
 
+SOURCE_FOR_CORS = os.environ.get('SOURCE_FOR_CORS', SOURCE_FOR_CORS)
+
 app = Flask(__name__)
 
 def printSMT(s):
@@ -29,7 +31,7 @@ def printSMT(s):
 def getTr():
     if request.method == "OPTIONS":
         return jsonify({"message": "OK"}), 200, {
-            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Origin": SOURCE_FOR_CORS,
             "Access-Control-Allow-Methods": "POST, OPTIONS",
             "Access-Control-Allow-Headers": "Content-Type, Accept"
         }
