@@ -121,7 +121,7 @@ async function countDown(config){
 			}
 			SSS = "sum = " + sum.toString()
 			console.log(SSS)
-			resStr = resStr + SSS + "<br>";
+			resStr = SSS +  "<br>" + resStr;
 			
 			
 			  var datetimes =  [];
