@@ -68,7 +68,7 @@ async function countDown(config){
 	
 	if(newStuff)
 	{
-		url = config.sourceSite +  ":" + config.backendPort + "/getTr";
+		url = config.sourceSite +  config.backendPort + "/getTr";
 		try 
 		{
 			const data222 = { fromAddress: fromAddress, toAddress: toAddress, daysToCheck: daysToCheck};
