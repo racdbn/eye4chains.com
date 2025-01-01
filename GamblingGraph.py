@@ -27,7 +27,7 @@ def printSMT(s):
     #print(ss)
 
    
-@app.route("/getTr", methods = ["POST", "OPTIONS"])
+@app.route("/api/getTr", methods = ["POST", "OPTIONS"])
 def getTr():
     if request.method == "OPTIONS":
         return jsonify({"message": "OK"}), 200, {
