@@ -1,9 +1,6 @@
 google.charts.load('current', {'packages':['corechart']});
 google.charts.setOnLoadCallback(drawChart);
-
-
-
-
+ 
 function revealMessage(){
 	document.getElementById("hiddenMessage").style.display = "block";
  
