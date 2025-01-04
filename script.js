@@ -20,6 +20,18 @@ async function fetchHTML(url) {
 }
 */
 
+function deepCopy(obj) {
+  if (typeof obj !== 'object' || obj === null) {
+    return obj;
+  }
+
+  const copy = Array.isArray(obj) ? [] : {};
+  for (const key in obj) {
+    copy[key] = deepCopy(obj[key]);
+  }
+  return copy;
+}
+
 async function fetchData(url) {
   const response = await fetch(url);
   return response.json();
@@ -32,14 +44,15 @@ async function countDown(config){
 	var currentVal = document.getElementById("countDownButton").innerHTML;
 	//var newVal = currentVal - 1;
 	//document.getElementById("countDownButton").innerHTML = newVal;
-	document.getElementById('selected-data').textContent = "Now it will be loading for some time. (For each address I request all tether transfer transactions from the EtherScan to find the relevant ones.  And EtherScan only gives us 10000 transaction at a time and has a 0.21 sec calldown. Maybe one day we will have our own nodes. But atm we can't since those bitches are giant in storage and bandwidth.)"
+	document.getElementById('selected-data').innerHTML = "Now it will be loading for some time. (For each address I request all tether transfer transactions from the EtherScan to find the relevant ones.  And EtherScan only gives us 10000 transaction at a time and has a 0.21 sec calldown. Maybe one day we will have our own nodes. But atm we can't since those bitches are giant in storage and bandwidth.)"
 	
 	reqts = []
 	req1 = {};
 	
 	fromAddress = document.getElementById("fromAddress").value;
-	toAddress = document.getElementById("toAddress").value;
+	casAddress = document.getElementById("toAddress").value;
 	daysToCheck = document.getElementById("daysToCheck").value;
+	maxPoints = document.getElementById("maxPoints").value; 
 	
 	//if(fromAddress.startsWith("0x") || fromAddress.startsWith("0X"))
 	//	fromAddress = fromAddress.substring(2)
@@ -68,84 +81,321 @@ async function countDown(config){
 		url = config.sourceSite +  config.backendPort + "/getTr";
 		try 
 		{
-			const data222 = { fromAddress: fromAddress, toAddress: toAddress, daysToCheck: daysToCheck};
+			LLL = 10
 			
-			const response = await fetch(url, 
+			// moved from python 
+			
+			savedTrans = []    
+  
+			fromAddress = fromAddress.trim();
+			fromAddresses = fromAddress.toLowerCase().replace(",", " ").split(/\s+/); 
+
+			casAddress = casAddress.trim();
+			toAddresseses = casAddress.toLowerCase().replace(",", " ").split(/\s+/);
+			daysToCheck = parseFloat(daysToCheck)
+			
+			UnixTimestampNow = Math.floor(Date.now() / 1000); 
+			
+ 
+			
+			if(casAddress.length < LLL + 1)
 			{
-			  method: 'POST', // Change to POST
-			  headers: {
-				'Content-Type': 'application/json'
-			  },
-			  body: JSON.stringify(data222)
-			}) 
-			 
-			const dddd = await response.json();
-			console.log(JSON.stringify(dddd));
- 
-			savedTrans = []
- 
-			for (let i = 0; i < dddd.length; i++) {
-			  console.log("dddd[i] = " +  JSON.stringify(dddd[i]));
-			  savedTrans.push(dddd[i])
+				toAddresseses = [];
+				toAddresseses.push("ANY");
 			}
 			
-			sum = 0
+			chains = ["polygon", "eth"]
+			for(let ch = 0; ch < chains.length; ch++)
+			{
+				chain = chains[ch]
+				for(let i = 0; i < fromAddresses.length; i++)
+				{
+					tmpfromAddress = fromAddresses[i];
+					for (let j = 0; j < toAddresseses.length; j++)
+					{
+						tmptoAddress = toAddresseses[j];
+						fromAddress = tmpfromAddress;
+						toAddress = tmptoAddress
+						if(fromAddress.startsWith("0x"))
+							fromAddress = fromAddress.substring(2);
+						if(toAddress.startsWith("0x"))
+							toAddress = toAddress.substring(2);
+						 
+						endblock = 99999999999999
+						while(endblock > 0)
+						{
+							data222 = {fromAddress: fromAddress, toAddress: toAddress, daysToCheck: daysToCheck, source: "ETHERSCAN", chain: chain, endblock: endblock, UnixTimestampNow: UnixTimestampNow};
+							
+							const response = await fetch(url, 
+							{
+							  method: 'POST', // Change to POST
+							  headers: {
+								'Content-Type': 'application/json'
+							  },
+							  body: JSON.stringify(data222)
+							}) 
+							 
+							const dddd = await response.json();
+							console.log(JSON.stringify(dddd));
+				 
+							endblock = dddd["endblock"];
+							
+							document.getElementById('selected-data').innerHTML = document.getElementById('selected-data').innerHTML + "<br> processed" + JSON.stringify(data222);
+				 
+							for (let i = 0; i < dddd["trans"].length; i++) {
+							  console.log("dddd[trans][i] = " +  JSON.stringify(dddd["trans"][i]));
+							  savedTrans.push(dddd["trans"][i])
+							}
+						}
+
+					}
+				}
+			}
+		 
+			
+			 
+			// end from python
+			
+			/*
+			data222 = {}
+			if(toAddress.length > LLL)
+			{
+				data222 = { fromAddress: fromAddress, toAddress: toAddress, daysToCheck: daysToCheck};
+			}
+			else
+			{
+				data222 = { fromAddress: fromAddress, toAddress: "", daysToCheck: daysToCheck};
+			}
+			*/
+			
+
+			
 			savedTrans.sort((a,b) => a["timeStamp"] - b["timeStamp"]);
 			resStr = ""
+			topSStr = ""
+			maxresStr = 1000
+			sum = 0
 			
-			for (let i = 0; i < savedTrans.length; i++)
+			
+			if(casAddress.length > LLL)
 			{
-				tr = savedTrans[i]
-				dt = (new Date(tr["timeStamp"] * 1000)).toString()
-				SSS = tr["direction"] + " " + JSON.stringify(tr["ammountSent"]) + ", time = " +  JSON.stringify(tr["timeStamp"]) +  "(UNIX) = " + dt + ", from = " + tr["from"].toString().substring(0,7) + ", to = " + tr["to"].toString().substring(0,7) + ", hash = " + tr["hash"];
- 
-				console.log(SSS);
-				resStr = resStr + SSS + "<br>";
-				console.log(tr["direction"])
-				if(tr["direction"] === "out")
+				
+				
+				
+				
+				for (let i = 0; i < savedTrans.length; i++)
 				{
-					console.log("indeed out")
-					sum -= tr["ammountSent"];
-				}
-				if(tr["direction"] === "in")
-				{
-					console.log("indeed in")
-					sum += tr["ammountSent"];
+					tr = savedTrans[i]
+					dt = (new Date(tr["timeStamp"] * 1000)).toString()
+					SSS = tr["direction"] + " " + JSON.stringify(tr["ammountSent"]) + ", time = " +  JSON.stringify(tr["timeStamp"]) +  "(UNIX) = " + dt + ", from = " + tr["from"].toString().substring(0,7) + ", to = " + tr["to"].toString().substring(0,7) + ", hash = " + tr["hash"];
+	 
+					console.log(SSS);
+					if(i < maxresStr)
+						resStr = resStr + SSS + "<br>";
+					console.log(tr["direction"])
+					if(tr["direction"] === "out")
+					{
+						console.log("indeed out")
+						sum -= tr["ammountSent"];
+					}
+					if(tr["direction"] === "in")
+					{
+						console.log("indeed in")
+						sum += tr["ammountSent"];
+					}
+					SSS = "sum = " + sum.toString()
+					tr["sum"] = sum
+					console.log(SSS)
 				}
 				SSS = "sum = " + sum.toString()
-				tr["sum"] = sum
 				console.log(SSS)
+				resStr = SSS +  "<br>" + resStr;
+				
+				
+
 			}
-			SSS = "sum = " + sum.toString()
-			console.log(SSS)
-			resStr = SSS +  "<br>" + resStr;
-			
-			
-			  var datetimes =  [];
-			  var values = [];
-			  
-			  for (let i = 0; i < savedTrans.length; i++)
-			  {
-				tr = savedTrans[i];
-				datetimes.push(new Date(tr["timeStamp"] * 1000))
-				values.push(tr["sum"])
-			  }
+			else
+			{
+				
+				
+				sums = {}
+				presums = {}
+				
+				for (let i = 0; i < savedTrans.length; i++)
+				{
+					tr = savedTrans[i]
+					console.log("tr = " + JSON.stringify(tr))
+					console.log("tr[to] = " + JSON.stringify(tr["to"]))
+					if(tr["direction"] === "out")
+					{
+						if (!(tr["to"] in sums))
+						{
+							//sums[tr["to"]] = {"sum": 0.0}
+							presums[tr["to"]] = {"sum": 0.0}
+						}
+					}
+					if(tr["direction"] === "in")
+					{
+						if (!(tr["from"] in sums))
+						{
+							//sums[tr["from"]] = {"sum": 0.0}
+							presums[tr["from"]] = {"sum": 0.0}
+						}
+					}
+				}
+				
+				for (let i = 0; i < savedTrans.length; i++)
+				{
+					tr = savedTrans[i]
+					if(tr["direction"] === "out")
+					{
+						presums[tr["to"]]["sum"] -= tr["ammountSent"];
+					}
+					if(tr["direction"] === "in")
+					{ 
+						presums[tr["from"]]["sum"] += tr["ammountSent"];
+					}
+				}
 
-			  var data = new google.visualization.DataTable();
-			  data.addColumn('datetime', 'Time');
-			  data.addColumn('number', 'Value');
+				presumsarr = []
+				for (const key in presums) {
+				   presumsarr.push({"key": key, "sum": presums[key]["sum"]})
+				   
+				}		
 
-			  for (var i = 0; i < datetimes.length; i++) {
-				data.addRow([new Date(datetimes[i]), values[i]]);
-			  }
+				presumsarr.sort((a,b) =>  b["sum"] * b["sum"] - a["sum"] * a["sum"]);
+				grNum = Math.min(presumsarr.length, parseInt(casAddress))
+				console.log("grNum = " + grNum.toString() + ",presumsarr.length " +  presumsarr.length.toString() + ", casAddress" + casAddress)		
+
+				for(var j = 0; j < grNum; j++)
+				{
+					sums[presumsarr[j]["key"]] = {"sum": 0.0}
+					topSStr = topSStr + presumsarr[j]["key"] + " " + presumsarr[j]["sum"] + "<br>"
+				}					
+				
+				
+				for (let i = 0; i < savedTrans.length; i++)
+				{
+					tr = savedTrans[i]
+					dt = (new Date(tr["timeStamp"] * 1000)).toString()
+					SSS = tr["direction"] + " " + JSON.stringify(tr["ammountSent"]) + ", time = " +  JSON.stringify(tr["timeStamp"]) +  "(UNIX) = " + dt + ", from = " + tr["from"].toString().substring(0,7) + ", to = " + tr["to"].toString().substring(0,7) + ", hash = " + tr["hash"];
+	 
+					console.log(SSS);
+					if(i < maxresStr)
+						resStr = resStr + SSS + "<br>";
+					console.log(tr["direction"])
+					if(tr["direction"] === "out")
+					{
+						console.log("indd out")
+						if(tr["to"] in sums)
+							sums[tr["to"]]["sum"] -= tr["ammountSent"];
+						sum -= tr["ammountSent"];
+					}
+					if(tr["direction"] === "in")
+					{
+						console.log("indd in")
+						if(tr["from"] in sums)
+							sums[tr["from"]]["sum"] += tr["ammountSent"];
+						sum += tr["ammountSent"];
+					}
+					SSS = "sum = " + sum.toString()
+					tr["sum"] = sum
+					tr["sums"] = deepCopy(sums)
+					console.log(SSS)
+				}
+				
+				
+				sumsarr = []
+				for (const key in sums) {
+				   sumsarr.push({"key": key, "sum": sums[key]["sum"]})
+				}
+				   
+				sumsarr.sort((a,b) =>  b["sum"] * b["sum"] - a["sum"] * a["sum"]);
+				//grNum = Math.min(sumsarr.length, parseInt(casAddress))
+				//console.log("grNum = " + grNum.toString() + ",sumsarr.length " +  sumsarr.length.toString() + ", casAddress" + casAddress)
+				
+			}
+			
+				  var datetimes =  [];
+				  var values = [];
+				 
+				  var data = new google.visualization.DataTable();
+				  data.addColumn('datetime', 'Time');
+				  data.addColumn('number', 'Value');				 
+				  
+
+				  
+				  for (let i = 0; i < savedTrans.length; i++)
+				  {
+					  tr = savedTrans[i];
+					  datetimes.push(new Date(tr["timeStamp"] * 1000))
+					  values.push(tr["sum"])
+				  
+				  }
+				  
+				  
+				  if(casAddress.length < LLL + 1)
+				  {
+					  for(var i = 0; i < sumsarr.length; i++)
+						data.addColumn('number', sumsarr[i]["key"]);
+				  }
+					  
+				  //console.log("savedTrans.length = " + savedTrans.length + ", maxPoints + 1 = " + (maxPoints + 1))	  
+				  //console.log("sums.toString() = " + sums.toString() +"Object.keys(sums).length = " + Object.keys(sums).length + ",sumsarr = " + sumsarr.length + ",sumsarr.length = " + sumsarr.length + "presums.toString() = " + presums.toString() +"Object.keys(presums).length = " + Object.keys(presums).length  + ",presumsarr.length = " + presumsarr.length + ",grNum = " + grNum )
+				  if(savedTrans.length < maxPoints + 1)
+				  {
+					  for (var i = 0; i < savedTrans.length; i++) 
+					  {
+						arr = [new Date(datetimes[i]), values[i]];
+						tr = savedTrans[i]; 
+						if(casAddress.length < LLL + 1)
+						{ 
+							for(var j = 0; j < sumsarr.length; j++)
+							{
+								//console.log("tr["sums"] = " + JSON.stringify(tr["sums"]))
+								//console.log("tr["sums"] = " + JSON.stringify(tr["sums"]))
+								arr.push(tr["sums"][sumsarr[j]["key"]]["sum"])
+							}
+						}
+						data.addRow(arr);
+					  }					  
+				  }	  
+				  else
+				  {
+					  startPoint = parseInt(savedTrans[0]["timeStamp"])
+					  endPoint = parseInt(savedTrans[savedTrans.length - 1]["timeStamp"])
+					  nextTime = startPoint
+					  for (var i = 0; i < savedTrans.length; i++) 
+					  {
+						tr = savedTrans[i];  
+						if(tr["timeStamp"] > nextTime)
+						{
+							data.addRow(arr); 
+							nextTime = nextTime +  (parseFloat(endPoint) - parseFloat(startPoint)) / maxPoints
+						}
+						
+						arr = [new Date(datetimes[i]), values[i]];
+						if(casAddress.length < LLL + 1)
+						{ 
+							for(var j = 0; j < sumsarr.length; j++)
+							{
+								//console.log("tr["sums"] = " + JSON.stringify(tr["sums"]))
+								//console.log("tr["sums"] = " + JSON.stringify(tr["sums"]))
+								arr.push(tr["sums"][sumsarr[j]["key"]]["sum"])
+							}
+						}	
+					  }
+					  data.addRow(arr);					  
+				  }				  
+			
 
 			  var options = {
 				title: 'Cumulative winnings',
 				curveType: 'function',
 				legend: { position: 'bottom' },
-				pointSize: 5,  // Increase the size of data points
-				pointShape: 'circle', // Choose a shape for the points
-				pointColor: 'red', // Set the color of the points
+				//pointSize: 5,  // Increase the size of data points
+				//pointShape: 'circle', // Choose a shape for the points
+				//pointColor: 'red', // Set the color of the points
 				height: 400
 			  };
 
@@ -175,10 +425,10 @@ async function countDown(config){
 			  
 			  
 			
-			document.getElementById('selected-data').textContent = "";			
+			document.getElementById('selected-data').innerHTML = "";			
 			const paragraph = document.getElementById("myParagraph");
 			//paragraph.innerHTML = "<p>All transactions!" + reqts[1]["fromAddress"] + "<br>" + resStr + "</p>";
-			paragraph.innerHTML = "<p>All transactions!" + "<br>" + resStr + "</p>";
+			paragraph.innerHTML = "<p>"+ "<br>" + topSStr + "<br>All transactions!" + "<br>" + resStr + "</p>";
 			
 		} 
 		catch (error) {

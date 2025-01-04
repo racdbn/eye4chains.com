@@ -23,10 +23,17 @@
 	<br>
 	<input type="text" id="toAddress" size="50">
 	<!--<div id="hiddenMessage" style="display:block"> -->
-	<p>If you put multiple addresses in a field separated by spaces or commas this should work too.</p>
+	<p>If you put multiple addresses in a field separated by spaces or commas this should work too.
+	<br>
+	If instead of address you put a whole number X (Ex: 10) in "From address" field, you will get graphs of "To address" against its top X contacts(i.e. the ones he sent the most or got the most from ) and also the graph of him vs everybody else.</p>
 	The number of days to check for transactions (Examples: 10 -> last 10 days, 0.25 -> last 6 hours)
+	</p>
 	<br>
 	<input type="text" id="daysToCheck" placeholder="7" value="7">
+	<br>
+	The maximum number of dates on the graph. (If there are too many points on graphs your browser can run out of memory.)
+	<br>
+	<input type="text" id="maxPoints" placeholder="1000" value="1000">
 	<br>
 	<button id="countDownButton" onclick= "countDown(window.config)">Get the graph</button>
 	<!--</div> -->
