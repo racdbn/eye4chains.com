@@ -428,7 +428,7 @@ async function countDown(config){
 			document.getElementById('selected-data').innerHTML = "";			
 			const paragraph = document.getElementById("myParagraph");
 			//paragraph.innerHTML = "<p>All transactions!" + reqts[1]["fromAddress"] + "<br>" + resStr + "</p>";
-			paragraph.innerHTML = "<p>"+ "<br>" + topSStr + "<br>All transactions!" + "<br>" + resStr + "</p>";
+			paragraph.innerHTML = "<p>"+ "Total:" + sum + "<br>" + "<br>" + topSStr + "<br>All transactions!" + "<br>" + resStr + "</p>";
 			
 		} 
 		catch (error) {
