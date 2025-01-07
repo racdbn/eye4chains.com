@@ -92,9 +92,26 @@ async function countDown(config){
 
 			casAddress = casAddress.trim();
 			toAddresseses = casAddress.toLowerCase().replace(",", " ").split(/\s+/);
-			daysToCheck = parseFloat(daysToCheck)
 			
-			UnixTimestampNow = Math.floor(Date.now() / 1000); 
+			
+			arrDaysToCheck = daysToCheck.trim().toLowerCase().replace(",", " ").split(/\s+/);
+			
+			UnixTimestampNow = Math.floor(Date.now() / 1000); 			
+			if(arrDaysToCheck.length == 1) 
+			{
+				daysToCheck = parseFloat(daysToCheck);
+				
+				startTimeStamp = (UnixTimestampNow - (daysToCheck * 60 * 60 * 24));
+				endTimeStamp = 99999999999999;
+			}
+			else 
+			{
+				startTimeStamp = parseFloat(arrDaysToCheck[0]);
+				endTimeStamp = parseFloat(arrDaysToCheck[1]);
+				 
+			}
+			
+
 			
  
 			
@@ -105,6 +122,7 @@ async function countDown(config){
 			}
 			
 			chains = ["polygon", "eth"]
+			//chains = ["eth"]
 			for(let ch = 0; ch < chains.length; ch++)
 			{
 				chain = chains[ch]
@@ -120,11 +138,12 @@ async function countDown(config){
 							fromAddress = fromAddress.substring(2);
 						if(toAddress.startsWith("0x"))
 							toAddress = toAddress.substring(2);
+						
 						 
-						endblock = 99999999999999
+						endblock = 99999999999999;
 						while(endblock > 0)
 						{
-							data222 = {fromAddress: fromAddress, toAddress: toAddress, daysToCheck: daysToCheck, source: "ETHERSCAN", chain: chain, endblock: endblock, UnixTimestampNow: UnixTimestampNow};
+							data222 = {fromAddress: fromAddress, toAddress: toAddress, source: "ETHERSCAN", chain: chain, endblock: endblock, endTimeStamp: endTimeStamp, startTimeStamp: startTimeStamp};
 							
 							const response = await fetch(url, 
 							{
@@ -365,11 +384,13 @@ async function countDown(config){
 					  startPoint = parseInt(savedTrans[0]["timeStamp"])
 					  endPoint = parseInt(savedTrans[savedTrans.length - 1]["timeStamp"])
 					  nextTime = startPoint
+					  firstTrNum = []
 					  for (var i = 0; i < savedTrans.length; i++) 
 					  {
 						tr = savedTrans[i];  
 						if(tr["timeStamp"] > nextTime)
 						{
+							firstTrNum.push(i);
 							data.addRow(arr); 
 							nextTime = nextTime +  (parseFloat(endPoint) - parseFloat(startPoint)) / maxPoints
 						}
@@ -411,6 +432,8 @@ async function countDown(config){
 				  // Display the selected data in the "selected-data" div
 				  
 				  tr = savedTrans[selection[0].row] 
+				  if(savedTrans.length >= maxPoints + 1)
+					  tr = savedTrans[firstTrNum[selection[0].row]]
 				  dt = (new Date(tr["timeStamp"] * 1000)).toString()
 				  SSS = tr["direction"] + " " + JSON.stringify(tr["ammountSent"]) + ", time = " +  JSON.stringify(tr["timeStamp"]) +  "(UNIX) = " + dt + ", from = " + tr["from"].toString().substring(0,7) + ", to = " + tr["to"].toString().substring(0,7) + ", hash = " + tr["hash"];
 				  
@@ -428,7 +451,7 @@ async function countDown(config){
 			document.getElementById('selected-data').innerHTML = "";			
 			const paragraph = document.getElementById("myParagraph");
 			//paragraph.innerHTML = "<p>All transactions!" + reqts[1]["fromAddress"] + "<br>" + resStr + "</p>";
-			paragraph.innerHTML = "<p>"+ "Total:" + sum + "<br>" + "<br>" + topSStr + "<br>All transactions!" + "<br>" + resStr + "</p>";
+			paragraph.innerHTML = "<p>"+ "Total:" + sum + "<br>" + "<br>" + topSStr + "<br>Fisrt " + maxresStr + " transactions" + "<br>" + resStr + "</p>";
 			
 		} 
 		catch (error) {

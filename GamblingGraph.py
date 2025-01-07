@@ -25,6 +25,19 @@ app = Flask(__name__)
 def printSMT(s):
     ss = "PSMT " + s
     #print(ss)
+    
+def aboveStart(tr, req):
+    if(req["startblock"] < 0):
+        if int(tr["timeStamp"]) >= req["startTimeStamp"]:
+            return True
+        else: 
+            return False
+    else:
+        if int(tr["blockNumber"]) >= req["startblock"]:
+            return True
+        else:
+            return False
+        
 
    
 @app.route("/api/getTr", methods = ["POST", "OPTIONS"])
@@ -41,8 +54,8 @@ def getTr():
     req = request.get_json()
      
     endblock = req["endblock"]
-    UnixTimestampNow = req["UnixTimestampNow"]
-    daysToCheck = req["daysToCheck"]
+    #UnixTimestampNow = req["UnixTimestampNow"]
+    #daysToCheck = req["daysToCheck"]
     
     toManyTrans = False
     
@@ -154,8 +167,10 @@ def getTr():
                
         for tr in tmpSavedTrans: 
             if int(tr["blockNumber"]) > tmpEndblock:
-                if UnixTimestampNow - int(tr["timeStamp"]) < daysToCheck * 60 * 60 * 24:
-                    savedTrans.append(tr) 
+                #if UnixTimestampNow - int(tr["timeStamp"]) < daysToCheck * 60 * 60 * 24:
+                if int(tr["timeStamp"]) >= req["startTimeStamp"]:
+                    if int(tr["timeStamp"]) <= req["endTimeStamp"]:
+                        savedTrans.append(tr) 
                 else:
                     timeToQuite = True
                 
@@ -164,8 +179,9 @@ def getTr():
         if (timeToQuite or (tmpEndblock == endblock)): # TODO +-1
             for tr in tmpSavedTrans: 
                 if int(tr["blockNumber"]) == tmpEndblock:
-                    if UnixTimestampNow - int(tr["timeStamp"]) < daysToCheck * 60 * 60 * 24:
-                        savedTrans.append(tr) 
+                    if int(tr["timeStamp"]) >= req["startTimeStamp"]:
+                        if int(tr["timeStamp"]) <= req["endTimeStamp"]:
+                            savedTrans.append(tr) 
             break
         else:
             endblock = tmpEndblock
