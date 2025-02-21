@@ -44,7 +44,7 @@ async function countDown(config){
 	var currentVal = document.getElementById("countDownButton").innerHTML;
 	//var newVal = currentVal - 1;
 	//document.getElementById("countDownButton").innerHTML = newVal;
-	document.getElementById('selected-data').innerHTML = "Now it will be loading for some time. (For each address I request all tether transfer transactions from the EtherScan to find the relevant ones.  And EtherScan only gives us 10000 transaction at a time and has a 0.21 sec calldown. Maybe one day we will have our own nodes. But atm we can't since those bitches are giant in storage and bandwidth.)"
+	document.getElementById('selected-data').innerHTML = "Now it will be loading for some time. (For each address I request all tether transfer transactions from the EtherScan to find the relevant ones.  And EtherScan only gives us 10000 transaction at a time and has a 0.21 sec calldown. Maybe one day we will have our own nodes. But atm we can't since those bitches are giant in storage and bandwidth.) <br> In the case if nothing happens for a couple of minutes this means that the site is probably broken. Feel free to DM me."
 	
 	reqts = []
 	req1 = {};
