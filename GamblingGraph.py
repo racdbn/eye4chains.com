@@ -5,6 +5,7 @@ import sys
 import os 
  
 sys.path.insert(0, os.path.abspath(".."))
+os.environ['TEMP'] = 'C:\\TEMP'  
 from secretsGG import *
  
 import time 
