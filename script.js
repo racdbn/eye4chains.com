@@ -53,6 +53,10 @@ async function countDown(config){
 	casAddress = document.getElementById("toAddress").value;
 	daysToCheck = document.getElementById("daysToCheck").value;
 	maxPoints = document.getElementById("maxPoints").value; 
+	network = document.getElementById("network").value;
+	
+	tokens2track = document.getElementById("tokens2track").value;
+	 
 	
 	//if(fromAddress.startsWith("0x") || fromAddress.startsWith("0X"))
 	//	fromAddress = fromAddress.substring(2)
@@ -121,52 +125,82 @@ async function countDown(config){
 				toAddresseses.push("ANY");
 			}
 			
-			chains = ["polygon", "eth"]
+			if(network == "eth+L2s+bsc")
+				chains = ["polygon", "eth", "bsc", "base", "arbOne"]
+			else
+			{
+				chains = []
+				chains.push(network)
+			}
+			
+
+			
 			//chains = ["eth"]
 			for(let ch = 0; ch < chains.length; ch++)
 			{
 				chain = chains[ch]
-				for(let i = 0; i < fromAddresses.length; i++)
+				
+				if(tokens2track == "stables")
+					tokens = ["usdt", "usdc"]
+				else
 				{
-					tmpfromAddress = fromAddresses[i];
-					for (let j = 0; j < toAddresseses.length; j++)
+					tokens = []
+					tokens.push(tokens2track)
+				}
+				
+				for(let tt = 0; tt < tokens.length; tt++)
+				{
+					token = tokens[tt]
+					for(let i = 0; i < fromAddresses.length; i++)
 					{
-						tmptoAddress = toAddresseses[j];
-						fromAddress = tmpfromAddress;
-						toAddress = tmptoAddress
-						if(fromAddress.startsWith("0x"))
-							fromAddress = fromAddress.substring(2);
-						if(toAddress.startsWith("0x"))
-							toAddress = toAddress.substring(2);
-						
-						 
-						endblock = 99999999999999;
-						while(endblock > 0)
+						tmpfromAddress = fromAddresses[i];
+						for (let j = 0; j < toAddresseses.length; j++)
 						{
-							data222 = {fromAddress: fromAddress, toAddress: toAddress, source: "ETHERSCAN", chain: chain, endblock: endblock, endTimeStamp: endTimeStamp, startTimeStamp: startTimeStamp};
+							tmptoAddress = toAddresseses[j];
+							fromAddress = tmpfromAddress;
+							toAddress = tmptoAddress
+							if(fromAddress.startsWith("0x"))
+								fromAddress = fromAddress.substring(2);
+							if(toAddress.startsWith("0x"))
+								toAddress = toAddress.substring(2);
 							
-							const response = await fetch(url, 
-							{
-							  method: 'POST', // Change to POST
-							  headers: {
-								'Content-Type': 'application/json'
-							  },
-							  body: JSON.stringify(data222)
-							}) 
 							 
-							const dddd = await response.json();
-							console.log(JSON.stringify(dddd));
-				 
-							endblock = dddd["endblock"];
-							
-							document.getElementById('selected-data').innerHTML = document.getElementById('selected-data').innerHTML + "<br> processed" + JSON.stringify(data222);
-				 
-							for (let i = 0; i < dddd["trans"].length; i++) {
-							  console.log("dddd[trans][i] = " +  JSON.stringify(dddd["trans"][i]));
-							  savedTrans.push(dddd["trans"][i])
+							endblock = 99999999999999;
+							while(endblock > 0)
+							{
+								data222 = {fromAddress: fromAddress, toAddress: toAddress, source: "ETHERSCAN", chain: chain, endblock: endblock, endTimeStamp: endTimeStamp, startTimeStamp: startTimeStamp,
+								"token": token};
+								
+								const response = await fetch(url, 
+								{
+								  method: 'POST', // Change to POST
+								  headers: {
+									'Content-Type': 'application/json'
+								  },
+								  body: JSON.stringify(data222)
+								}) 
+								 
+								const dddd = await response.json();
+								console.log(JSON.stringify(dddd));
+					 
+								endblock = dddd["endblock"];
+								
+								ERRORMSG = ""
+								if("error" in dddd)
+									ERRORMSG  = " with ERROR=[" + dddd["error"] + "] ";
+								
+								document.getElementById('selected-data').innerHTML = document.getElementById('selected-data').innerHTML + "<br> processed" + ERRORMSG + JSON.stringify(data222);
+								
+								if ("error" in dddd)
+									break;
+					 
+								for (let i = 0; i < dddd["trans"].length; i++) {
+								  console.log("dddd[trans][i] = " +  JSON.stringify(dddd["trans"][i]));
+								  savedTrans.push(dddd["trans"][i])
+								}
 							}
-						}
 
+						}
 					}
 				}
 			}

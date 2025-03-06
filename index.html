@@ -9,9 +9,9 @@
 	<!-- <button onclick="revealMessage()">Click me!</button> -->
 	This site shows the flow of funds from one address to another.
 	<br>
-	So far only USDT on ETH and USDT on Polygon are supported.
+	So far only USDT/USDC on ETH/BSC/Polygon/Base/Arbitrum are supported.
 	<br>
-	Let me know if you want to see other coins / chains or in the case if the site is broken.	
+	Let me know if you want to see other coins/chains or in the case if the site is broken.	
 	<br>
 	(I am @racdbn on telegram and discord)
 	<br>
@@ -31,6 +31,48 @@
 	If instead of address you put a whole number X (Ex: 10) in "From address" field, you will get graphs of "To address" against its top X contacts(i.e. the ones he sent the most or got the most from ) and also the graph of him vs everybody else.</p>
 	
 	</p>
+		Choose network(s):
+		<select name="network" id="network" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;">
+			<option value="polygon" selected>polygon</option>
+			<option value="eth">eth</option>
+			<option value="bsc">bsc</option>
+			<option value="base">base</option>
+			<option value="arbOne">arbOne</option>
+			<option value="eth+L2s+bsc">eth+L2s+bsc</option>
+		</select>
+
+		<style>
+			select {
+				cursor: pointer;
+				margin: 10px;
+			}
+
+			option:hover {
+				background-color: #f0f0f0;
+			}
+		</style>
+	</p>
+	
+	</p>
+		Choose token(s):
+		<select name="tokens2track" id="tokens2track" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;">
+			<option value="usdt">usdt</option>
+			<option value="usdc">usdc</option>
+			<option value="stables"selected>stables</option>
+		</select>
+
+		<style>
+			select {
+				cursor: pointer;
+				margin: 10px;
+			}
+
+			option:hover {
+				background-color: #f0f0f0;
+			}
+		</style>
+	</p>
+	
 	The number of days to check for transactions (Examples: 10 -> last 10 days, 0.25 -> last 6 hours). Alternatively you can put two Unixtimestamps and the script will search for transactions after the first timestamp but before the second. 
 	<br>
 	<input type="text" id="daysToCheck" placeholder="7" value="7">

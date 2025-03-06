@@ -69,40 +69,82 @@ def getTr():
             break
     
         timeToQuite = False
-        if req["source"] == "POLYGONSCAN":
-            url = "https://api.polygonscan.com/api"
-            url = url + "?module=account"
-            url = url + "&action=tokentx"
-            url = url + "&address=" + "0x" + req['fromAddress']
-            url = url + "&startblock=0"
-            url = url + "&endblock=" + str(endblock)
-            url = url + "&page=1"
-            url = url + "&offset=10000"
-            url = url + "&sort=desc"
-            url = url + "&apikey=" + POLYGONSCAN_API_KEY
-             
+        
+        
+        #if req["source"] == "POLYGONSCAN":
+        #    url = "https://api.polygonscan.com/api"
+        #    url = url + "?module=account"
+        #    url = url + "&action=tokentx"
+        #    url = url + "&address=" + "0x" + req['fromAddress']
+        #    url = url + "&startblock=0"
+        #    url = url + "&endblock=" + str(endblock)
+        #    url = url + "&page=1"
+        #    url = url + "&offset=10000"
+        #    url = url + "&sort=desc"
+        #    url = url + "&apikey=" + POLYGONSCAN_API_KEY
+        #     
+        #    
+        #    tokenContract = "0xc2132d05d31c914a87c6611c10748aeb04b58e8f".lower()
             
-            tetherContract = "0xc2132d05d31c914a87c6611c10748aeb04b58e8f".lower()
+        #if req["source"] == "TRONSCAN":   
+        #    if(req["token"] == "usdt"):
+        #        tokenContract = "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t"
+        #    if(req["token"] == "usdc"):
+        #        tokenContract = "".lower()    
+        #        
+        #    url = "https://apilist.tronscanapi.com/api/token_trc20/transfers?"
+        #    url = url + "&start=0"
+        #    url = url + "&endblock=" + str(endblock)
+        #    url = url + "&limit=10000"
+        #    url = url + "&contract_address=" + tokenContract
+        #    url = url + "&relatedAddress=" + "0x" + req['fromAddress']
+        #    url = url + "&page=1"
+        #    url = url + "&apikey=" + TRONSCAN_API_KEY
+        
             
         if req["source"] == "ETHERSCAN":  
             if req["chain"] == "polygon":
-                tetherContract = "0xc2132d05d31c914a87c6611c10748aeb04b58e8f".lower()
+                if(req["token"] == "usdt"):
+                    tokenContract = "0xc2132d05d31c914a87c6611c10748aeb04b58e8f".lower()
+                if(req["token"] == "usdc"):
+                    tokenContract = "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359".lower()
                 chainid = 137
             
- 
-            
+            if req["chain"] == "bsc":
+                if(req["token"] == "usdt"):
+                    tokenContract = "0x55d398326f99059fF775485246999027B3197955".lower()                
+                if(req["token"] == "usdc"):
+                    tokenContract = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d".lower()
+                chainid = 56
                 
+            if req["chain"] == "base":
+                if(req["token"] == "usdt"):
+                    tokenContract = "0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2".lower()                
+                if(req["token"] == "usdc"):
+                    tokenContract = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913".lower()
+                chainid = 8453
             
-            if req["chain"] == "eth":
-                
-                tetherContract = "0xdAC17F958D2ee523a2206206994597C13D831ec7".lower()
+            if req["chain"] == "arbOne":
+                if(req["token"] == "usdt"):
+                    tokenContract = "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9".lower()                
+                if(req["token"] == "usdc"):
+                    tokenContract = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831".lower()
+                chainid = 42161
+            
+            if req["chain"] == "eth":  
+                if(req["token"] == "usdt"):
+                    tokenContract = "0xdAC17F958D2ee523a2206206994597C13D831ec7".lower()
+                if(req["token"] == "usdc"):
+                    tokenContract = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48".lower()    
                 chainid = 1
+            
+            
             
             url = "https://api.etherscan.io/v2/api"
             url = url + "?chainid=" + str(chainid)
             url = url + "&module=account"
             url = url + "&action=tokentx"
-            url = url + "&contractaddress=" + tetherContract
+            url = url + "&contractaddress=" + tokenContract
             url = url + "&address=" + "0x" + req['fromAddress']
             url = url + "&page=1"
             url = url + "&offset=10000"
@@ -111,14 +153,24 @@ def getTr():
             url = url + "&sort=desc"
             url = url + "&apikey=" + ETHERSCAN_API_KEY
                 
+        print("req[chain] = " + str(req["chain"]))
  
         print("requesting " + req["source"] + " " + req["chain"] + " " + req['fromAddress'] + ", endblock = " + str(endblock))
-        response = requests.get(url)
-        print("response = " + str(response))
-        print(f"fresponse = {response}") 
-        rrr = response.json()
-        print("rrr = " + str(rrr)) 
         
+        retriesNum = 3
+        for i in range(retriesNum):
+            response = requests.get(url)
+            print("response = " + str(response))
+            print(f"fresponse = {response}") 
+            rrr = response.json()
+            print("rrr = " + str(rrr)) 
+            if(response.json()['message']).startswith('Unexpected error'):
+                if(i < retriesNum - 1):
+                    time.sleep(5 * ETHERSCAN_SLEEP_BETWEEN_REQUESTS_SECS)
+                else:
+                  res = jsonify({"trans": savedTrans, "endblock": endblock, "error": "End point unexpected error"})   
+            else:
+                break 
 
         AllTrans = rrr.get("result")
         printSMT("AllTrans = " + str(AllTrans))
@@ -149,7 +201,7 @@ def getTr():
                 if req["chain"] == "eth":
                     correctToken = True
                 else:
-                    if(tr.get("contractAddress")== tetherContract):
+                    if(tr.get("contractAddress")== tokenContract):
                         correctToken = True
                     else:
                         printSMT("tether ---")
