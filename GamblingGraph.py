@@ -71,7 +71,7 @@ def getTr():
     now = datetime.now()
     
     tnow = now.strftime("%Y-%m-%d_%H-%M-%S")
-    log_file = open("..\\Logs\\" + tnow + '.log', 'a')
+    log_file = open("..\\RacdbnLogs\\" + tnow + '.log', 'a')
     
     while(True):
         if(len(savedTrans) > 10000):
