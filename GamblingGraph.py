@@ -9,6 +9,7 @@ os.environ['TEMP'] = 'C:\\TEMP'
 from secretsGG import *
  
 import time 
+from datetime import datetime
  
 
 POLYGONSCAN_API_KEY = os.environ.get('POLYGONSCAN_API_KEY', POLYGONSCAN_API_KEY)
@@ -26,6 +27,11 @@ app = Flask(__name__)
 def printSMT(s):
     ss = "PSMT " + s
     #print(ss)
+    
+def printWLOG(logf,s):
+    print(s)  
+    print(s, file=logf)
+        
     
 def aboveStart(tr, req):
     if(req["startblock"] < 0):
@@ -62,6 +68,10 @@ def getTr():
     
     savedTrans = []
     
+    now = datetime.now()
+    
+    tnow = now.strftime("%Y-%m-%d_%H-%M-%S")
+    log_file = open("..\\Logs\\" + tnow + '.log', 'a')
     
     while(True):
         if(len(savedTrans) > 10000):
@@ -153,17 +163,19 @@ def getTr():
             url = url + "&sort=desc"
             url = url + "&apikey=" + ETHERSCAN_API_KEY
                 
-        print("req[chain] = " + str(req["chain"]))
+        printWLOG(log_file,"req[chain] = " + str(req["chain"]))
  
-        print("requesting " + req["source"] + " " + req["chain"] + " " + req['fromAddress'] + ", endblock = " + str(endblock))
+        printWLOG(log_file,"requesting " + req["source"] + " " + req["chain"] + " " + req['fromAddress'] + ", endblock = " + str(endblock))
+        
+        printWLOG(log_file,"requesting(full) " + json.dumps(req))
         
         retriesNum = 3
         for i in range(retriesNum):
             response = requests.get(url)
-            print("response = " + str(response))
-            print(f"fresponse = {response}") 
+            printWLOG(log_file,"response = " + str(response))
+            printWLOG(log_file,f"fresponse = {response}") 
             rrr = response.json()
-            print("rrr = " + str(rrr)) 
+            printWLOG(log_file,"rrr = " + str(rrr)) 
             if(response.json()['message']).startswith('Unexpected error'):
                 if(i < retriesNum - 1):
                     time.sleep(5 * ETHERSCAN_SLEEP_BETWEEN_REQUESTS_SECS)
@@ -250,7 +262,8 @@ def getTr():
     #        sum += tr["ammountSent"]
     #print("sum = " + str(sum))
     
-    print("Sending shit to the client")
+    printWLOG(log_file,"Sending shit to the client")
+    log_file.close()
     if not toManyTrans:
         endblock = -1
     
