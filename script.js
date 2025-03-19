@@ -58,14 +58,46 @@ async function getTransfersBlockscout(data)
 	let CONTRACT_ADDRESS;
 	let API_ENDPOINT;
 	 
- 
+	//((chain == "eth") || (chain == "base") || (chain == "arbOne")|| (chain == "optimism")
+	const chain = data["chain"]
 
-	API_ENDPOINT = "https://eth.blockscout.com/api";
+	if(chain == "eth")
+		API_ENDPOINT = "https://eth.blockscout.com/api";	
+	if(chain == "base")
+		API_ENDPOINT = "https://base.blockscout.com/api";	
+	if(chain == "arbOne")
+		API_ENDPOINT = "https://arbitrum.blockscout.com/api";	
+	if(chain == "optimism")
+		API_ENDPOINT = "https://optimism.blockscout.com/api";
 	
-	if(data["token"] == "usdt")
-		CONTRACT_ADDRESS = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
-	if(data["token"] == "usdc")
-		CONTRACT_ADDRESS = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
+	if(chain == "eth")
+	{
+		if(data["token"] == "usdt")
+			CONTRACT_ADDRESS = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
+		if(data["token"] == "usdc")
+			CONTRACT_ADDRESS = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
+	}	
+	if(chain == "base")
+	{
+		if(data["token"] == "usdt")
+			CONTRACT_ADDRESS = "0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2";
+		if(data["token"] == "usdc")
+			CONTRACT_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+	}	
+	if(chain == "arbOne")
+	{
+		if(data["token"] == "usdt")
+			CONTRACT_ADDRESS = "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9";
+		if(data["token"] == "usdc")
+			CONTRACT_ADDRESS = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831";
+	}	
+	if(chain == "optimism")
+	{
+		if(data["token"] == "usdt")
+			CONTRACT_ADDRESS = "0x94b008aA00579c1307B0EF2c499aD98a8ce58e58";
+		if(data["token"] == "usdc")
+			CONTRACT_ADDRESS = "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85";
+	}
 	
 	
 	address = data["fromAddress"];
@@ -98,7 +130,7 @@ async function getTransfersBlockscout(data)
 	let urls = [];
 	let datas = [];
 	
-	document.getElementById('selected-data').innerHTML += "Getting eth transfers";
+	document.getElementById('selected-data').innerHTML += "Getting " + + " transfers";
 	document.getElementById('selected-data').innerHTML += "params = " + params.toString();
  
 	let page = 1 
@@ -362,7 +394,8 @@ async function countDown(config){
 	var currentVal = document.getElementById("countDownButton").innerHTML;
 	//var newVal = currentVal - 1;
 	//document.getElementById("countDownButton").innerHTML = newVal;
-	sss = "Now it will be loading for some time. (For each address I request all tether transfer transactions from the EtherScan to find the relevant ones.  And EtherScan only gives us 10000 transaction at a time and has a 0.21 sec calldown. Maybe one day we will have our own nodes. But atm we can't since those bitches are giant in storage and bandwidth.) <br> In the case if nothing happens for a couple of minutes this means that the site is probably broken. Feel free to DM me."
+	sss = "loading..."
+	//sss = "Now it will be loading for some time. (For each address I request all tether transfer transactions from the EtherScan to find the relevant ones.  And EtherScan only gives us 10000 transaction at a time and has a 0.21 sec calldown. Maybe one day we will have our own nodes. But atm we can't since those bitches are giant in storage and bandwidth.) <br> In the case if nothing happens for a couple of minutes this means that the site is probably broken. Feel free to DM me."
 	//document.getElementById('selected-data').innerHTML = sss;
 	prpr(sss);
 	
@@ -451,7 +484,7 @@ async function countDown(config){
 			}
 			
 			if(network == "eth+L2s+bsc")
-				chains = ["polygon", "eth", "bsc", "base", "arbOne"]
+				chains = ["polygon", "eth", "bsc", "base", "arbOne", "optimism"]
 			else
 			{
 				chains = []
@@ -497,7 +530,7 @@ async function countDown(config){
 							let dddd = {"status": "not fetched"};
 
 									
-								if((chain !== "tron") && (chain !== "eth")) 
+								if((chain !== "tron") && (chain !== "eth") && (chain !== "base")&& (chain !== "arbOne") && (chain !== "optimism")) 
 								{	
 									while(endblock > 0)
 									{
@@ -534,7 +567,7 @@ async function countDown(config){
 										}
 									}
 								}
-								else // chain == "tron" or "eth"
+								else // chain == "tron" or "eth" or L2s expt poly
 								{
 									
 									data222 = {fromAddress: fromAddress, toAddress: toAddress, chain: chain, endblock: endblock, endTimeStamp: endTimeStamp, startTimeStamp: startTimeStamp, "token": token};
@@ -550,7 +583,7 @@ async function countDown(config){
 										document.getElementById('selected-data').innerHTML += `Critical error: ${error.message}`;
 										}
 									}
-									if(chain == "eth")
+									if((chain == "eth") || (chain == "base") || (chain == "arbOne")|| (chain == "optimism"))
 									{
 										try {
 											dddd = await getTransfersBlockscout(data222);
