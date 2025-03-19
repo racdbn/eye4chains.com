@@ -42,46 +42,245 @@ function sleepVen(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+function prpr(ss) 
+{
+	//document.getElementById('selected-data').innerHTML += ss;
+	document.getElementById('selected-data').innerHTML = ss;
+}
+
+async function getTransfersBlockscout(data)
+{
+	//document.getElementById('selected-data').innerHTML = document.getElementById('selected-data').innerHTML + "<br> processed" + ERRORMSG + JSON.stringify(data222);
+	//document.getElementById('selected-data').innerHTML = document.getElementById('selected-data').innerHTML + " tron retriever is under construction";
+	
+	//return {"test": "testTTT", "trans": []};
+	
+	let CONTRACT_ADDRESS;
+	let API_ENDPOINT;
+	 
+ 
+
+	API_ENDPOINT = "https://eth.blockscout.com/api";
+	
+	if(data["token"] == "usdt")
+		CONTRACT_ADDRESS = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
+	if(data["token"] == "usdc")
+		CONTRACT_ADDRESS = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
+	
+	
+	address = data["fromAddress"];
+	
+	const params = new URLSearchParams({
+		module: "account",
+		action: "tokentx",
+		contractaddress: CONTRACT_ADDRESS,
+		address: "0x" + address,
+		page: 1,
+		offset: 1000,
+		//startblock: data['startblock'],
+		//endblock: data['endblock'],
+		sort: "desc",
+		only_confirmed: "true",
+	});
+
+	
+	//document.getElementById('selected-data').innerHTML += "fromAddress = " + data["fromAddress"] + ",toAddress = " + data["toAddress"] + ","
+	//document.getElementById('selected-data').innerHTML += "DPASDJPOWSA"
+	
+	
+	
+
+
+    let allTrans = [];
+    let status1 = "";
+    let fingerprint;
+	let responses = [];
+	let urls = [];
+	let datas = [];
+	
+	document.getElementById('selected-data').innerHTML += "Getting eth transfers";
+	document.getElementById('selected-data').innerHTML += "params = " + params.toString();
+ 
+	let page = 1 
+    while (status1 !== "doneFetching") 
+	{
+        let retriesLeft = 3;
+        status1 = "startingRequests";
+        let dddd;
+		
+        while (retriesLeft > 0) 
+		{
+            try {
+				params.set("page", page);
+                const url = `${API_ENDPOINT}?${params}`;
+                //const url = API_ENDPOINT + "?" + params.toString();
+				document.getElementById('selected-data').innerHTML += "page = [" + page + "]";
+				document.getElementById('selected-data').innerHTML += "url = [" + url + "]";
+                
+                const response = await fetch(url);
+				
+				//const data3333 = await response.json();
+				//datas.push(data3333);
+				
+
+				
+				
+				responses.push(response);
+
+				
+				//document.getElementById('selected-data').innerHTML += "response = [" + response + "]";
+				urls.push(url);
+				 
+				//document.getElementById('selected-data').innerHTML += "response = " + JSON.stringify(response.json());
+				console.log("response");
+				console.log(response);
+				
+
+				
+				
+                //if (!response.ok) 
+				//{
+                //    status1 = "response not .ok";
+                //    document.getElementById('selected-data').innerHTML += 
+                //        `Error: HTTP ${response.status}\n`;
+                //    retriesLeft--;
+                //    await sleepVen(210);
+                //    continue;
+                //}
+				
+
+
+                const predata = await response.json();
+				
+
+				
+                dddd = predata.result || [];
+				datas.push(dddd);
+				//return {
+				//	trans: allTrans,
+				//	kickedByAPIReason: status1,
+				//	responses: responses,
+				//	datas: datas,
+				//	urls: urls
+				//};
+				//document.getElementById('selected-data').innerHTML += "dddd = " + JSON.stringify(dddd);
+				
+				
+				
+				//return {
+				//	trans: allTrans,
+				//	kickedByAPIReason: status1,
+				//	responses: responses,
+				//	datas: datas,
+				//	urls: urls
+				//};				
+				
+				//document.getElementById('selected-data').innerHTML += "PPPPPPPPPP"
+			
+				if(dddd.length == 0)
+				{
+					status1 = "doneFetching";
+					break;
+				}
+				else 
+				{
+					Last = dddd.length - 1;
+					if(parseInt(dddd[Last]["timeStamp"]) < parseInt(dddd["startTimeStamp"]))
+					{
+						status1 = "doneFetching";
+						break;
+					}
+				}
+				
+				//document.getElementById('selected-data').innerHTML += "EEEEEEEEE"
+				
+                status1 = "fetchedCorr";
+                break;
+ 
+            } catch (error) {
+                document.getElementById('selected-data').innerHTML += 
+                    `Error: ${error.message}\n`;
+                retriesLeft--;
+                await sleepVen(500);
+            }
+        }
+		
+		page += 1
+		
+		//document.getElementById('selected-data').innerHTML += "SSSSSSSSSSSSSS status1 = " + status1;
+
+        if (status1 !== "fetchedCorr") {
+            allTrans.sort((a, b) => a.timeStamp - b.timeStamp);
+			
+			document.getElementById('selected-data').innerHTML += "\n ON RETURN allTrans.length.toString() = [" + allTrans.length.toString() + "]"
+			
+            return {
+                trans: allTrans,
+                kickedByAPIReason: status1,
+				responses: responses,
+				urls: urls
+            };
+        }
+		//document.getElementById('selected-data').innerHTML += "QQQQQQQQQQQQQQQQQQ data = " + JSON.stringify(dddd);
+		
+		for(let i = 0; i < dddd.length; i++)
+		{
+			tr = dddd[i];
+			if(parseInt(tr["timeStamp"]) < parseInt(data["endTimeStamp"]))
+				if(parseInt(tr["timeStamp"]) > parseInt(data["startTimeStamp"]))
+					allTrans.push(tr);
+		}
+		//document.getElementById('selected-data').innerHTML += "TTT4TTTTallTrans = " + JSON.stringify(allTrans);
+		//document.getElementById('selected-data').innerHTML += "\n" + allTrans.length.toString()
+		//document.getElementById('selected-data').innerHTML += "\n allTrans.length.toString() = [" + allTrans.length.toString() + "]"
+    }
+	 	
+}
+
 async function getTronTransfers(data) {
 	//document.getElementById('selected-data').innerHTML = document.getElementById('selected-data').innerHTML + "<br> processed" + ERRORMSG + JSON.stringify(data222);
 	//document.getElementById('selected-data').innerHTML = document.getElementById('selected-data').innerHTML + " tron retriever is under construction";
 	
 	//return {"test": "testTTT", "trans": []};
 	
-	 
-	const API_ENDPOINT = "https://api.trongrid.io/v1/accounts/{address}/transactions/trc20";
-	//const CONTRACT_ADDRESS = "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t";
 	let CONTRACT_ADDRESS;
+	let API_ENDPOINT;
+	 
+ 
+	API_ENDPOINT = "https://api.trongrid.io/v1/accounts/{address}/transactions/trc20";
+	
 	if(data["token"] == "usdt")
 		CONTRACT_ADDRESS = "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t";
 	if(data["token"] == "usdc")
 		CONTRACT_ADDRESS = "TEkxiTehnzSmSe2XqrBj4w32RUN966rdz8";
+	
+	const params = new URLSearchParams({
+		contract_address: CONTRACT_ADDRESS,
+		limit: 200,
+		only_confirmed: "true",
+		min_timestamp: parseInt(data["startTimeStamp"]) * 1000,
+		max_timestamp: parseInt(data["endTimeStamp"]) * 1000
+	});
 	
 	//document.getElementById('selected-data').innerHTML += "fromAddress = " + data["fromAddress"] + ",toAddress = " + data["toAddress"] + ","
 	//document.getElementById('selected-data').innerHTML += "DPASDJPOWSA"
 	address = data["fromAddress"];
 	
 	
-    const params = new URLSearchParams({
-        contract_address: CONTRACT_ADDRESS,
-        limit: 200,
-        only_confirmed: "true",
-		min_timestamp: parseInt(data["startTimeStamp"]) * 1000,
-		max_timestamp: parseInt(data["endTimeStamp"]) * 1000
-    });
+
 
     let allTrans = [];
     let status1 = "";
     let fingerprint;
 	
 	document.getElementById('selected-data').innerHTML += "Getting tron transfers";
-	document.getElementById('selected-data').innerHTML += "params = " + params.toString();
+	
  
 
     while (status1 !== "doneFetching") {
         let retriesLeft = 3;
         status1 = "startingRequests";
-        let data;
+        let dddd;
         while (retriesLeft > 0) {
             try {
                 const url = `${API_ENDPOINT.replace("{address}", address)}?${params}`;
@@ -95,6 +294,12 @@ async function getTronTransfers(data) {
                         // "TRON-PRO-API-KEY": "YOUR_KEY"
                     }
                 });
+				
+				//document.getElementById('selected-data').innerHTML += "211111111111111111111111111111122211";
+				document.getElementById('selected-data').innerHTML += "params = " + params.toString();
+				//document.getElementById('selected-data').innerHTML += "response = " + JSON.stringify(response);
+				//console.log("response");
+				//console.log(response);
 
                 if (!response.ok) {
                     status1 = "codeNot200";
@@ -106,7 +311,7 @@ async function getTronTransfers(data) {
                 }
 
                 const predata = await response.json();
-                data = predata.data || [];
+                dddd = predata.data || [];
                 fingerprint = predata.meta?.fingerprint;
 
                 if (!fingerprint) {
@@ -130,7 +335,7 @@ async function getTronTransfers(data) {
 
         if (status1 !== "fetchedCorr") {
             if (status1 === "noFingerprint") {
-                allTrans = [...allTrans, ...data];
+                allTrans = [...allTrans, ...dddd];
             }
             allTrans.sort((a, b) => a.block_timestamp - b.block_timestamp);
 			
@@ -142,7 +347,7 @@ async function getTronTransfers(data) {
             };
         }
 
-        allTrans = [...allTrans, ...data];
+        allTrans = [...allTrans, ...dddd];
 		//document.getElementById('selected-data').innerHTML += "\n" + allTrans.length.toString()
 		document.getElementById('selected-data').innerHTML += "\n allTrans.length.toString() = [" + allTrans.length.toString() + "]"
     }
@@ -157,7 +362,10 @@ async function countDown(config){
 	var currentVal = document.getElementById("countDownButton").innerHTML;
 	//var newVal = currentVal - 1;
 	//document.getElementById("countDownButton").innerHTML = newVal;
-	document.getElementById('selected-data').innerHTML = "Now it will be loading for some time. (For each address I request all tether transfer transactions from the EtherScan to find the relevant ones.  And EtherScan only gives us 10000 transaction at a time and has a 0.21 sec calldown. Maybe one day we will have our own nodes. But atm we can't since those bitches are giant in storage and bandwidth.) <br> In the case if nothing happens for a couple of minutes this means that the site is probably broken. Feel free to DM me."
+	sss = "Now it will be loading for some time. (For each address I request all tether transfer transactions from the EtherScan to find the relevant ones.  And EtherScan only gives us 10000 transaction at a time and has a 0.21 sec calldown. Maybe one day we will have our own nodes. But atm we can't since those bitches are giant in storage and bandwidth.) <br> In the case if nothing happens for a couple of minutes this means that the site is probably broken. Feel free to DM me."
+	//document.getElementById('selected-data').innerHTML = sss;
+	prpr(sss);
+	
 	
 	reqts = []
 	req1 = {};
@@ -224,7 +432,7 @@ async function countDown(config){
 				daysToCheck = parseFloat(daysToCheck);
 				
 				startTimeStamp = (UnixTimestampNow - (daysToCheck * 60 * 60 * 24));
-				endTimeStamp = 99999999999999;
+				endTimeStamp = UnixTimestampNow;
 			}
 			else 
 			{
@@ -289,7 +497,7 @@ async function countDown(config){
 							let dddd = {"status": "not fetched"};
 
 									
-								if(chain !== "tron")
+								if((chain !== "tron") && (chain !== "eth")) 
 								{	
 									while(endblock > 0)
 									{
@@ -326,33 +534,72 @@ async function countDown(config){
 										}
 									}
 								}
-								else // chain == "tron"
+								else // chain == "tron" or "eth"
 								{
 									
 									data222 = {fromAddress: fromAddress, toAddress: toAddress, chain: chain, endblock: endblock, endTimeStamp: endTimeStamp, startTimeStamp: startTimeStamp, "token": token};
-									data222["source"] = "TronGrid"
-									try {
-										dddd = await getTronTransfers(data222);
-									}catch (error) {
-									document.getElementById('selected-data').innerHTML += `Critical error: ${error.message}`;
+									//if(chain == "tron")
+									//	data222["source"] = "TronGrid"
+									//if(chain == "eth")
+									//	data222["source"] = "blockscout"
+									if(chain == "tron")
+									{
+										try {
+											dddd = await getTronTransfers(data222);
+										}catch (error) {
+										document.getElementById('selected-data').innerHTML += `Critical error: ${error.message}`;
+										}
 									}
-									document.getElementById('selected-data').innerHTML += "TRRRRRRRRRRRRRRRRON " + JSON.stringify(data222);
+									if(chain == "eth")
+									{
+										try {
+											dddd = await getTransfersBlockscout(data222);
+										}catch (error) {
+										document.getElementById('selected-data').innerHTML += `Critical error: ${error.message}`;
+										}
+									}
+									document.getElementById('selected-data').innerHTML += "RRRRRRRRRRRRRRR " + JSON.stringify(data222);
 									
+									document.getElementById('selected-data').innerHTML += "<br> dddd = " + JSON.stringify(dddd);
  
 									for(let i = 0; i < dddd["trans"].length; i++)
 									{
 										tr = dddd["trans"][i];
 							 
-										if(tr["from"] == data222["fromAddress"])
-											if((tr["to"] == data222["toAddress"]) || (data222["toAddress"].toLowerCase() == "any"))
-												tr["direction"] = "out";
-							 
-							 
-										if(tr["to"] == data222["fromAddress"])
-											if((tr["from"] == data222["toAddress"]) || (data222["toAddress"].toLowerCase() == "any"))
-												tr["direction"] = "in";
-
-										ammountSent = parseInt(tr["value"])  *  (0.1 ** parseInt(tr["token_info"]["decimals"]));
+										if(chain == "tron")
+										{
+											if(tr["from"] == data222["fromAddress"])
+												if((tr["to"] == data222["toAddress"]) || (data222["toAddress"].toLowerCase() == "any"))
+													tr["direction"] = "out";
+								 
+								 
+											if(tr["to"] == data222["fromAddress"])
+												if((tr["from"] == data222["toAddress"]) || (data222["toAddress"].toLowerCase() == "any"))
+													tr["direction"] = "in";
+										}
+										else
+										{
+											if(tr["from"].toLowerCase() == "0x" + data222["fromAddress"].toLowerCase())
+												if((tr["to"].toLowerCase() == "0x" + data222["toAddress"].toLowerCase()) || (data222["toAddress"].toLowerCase() == "any"))
+													tr["direction"] = "out";
+								 
+								 
+											if(tr["to"].toLowerCase() == "0x" + data222["fromAddress"].toLowerCase())
+												if((tr["from"].toLowerCase() == "0x" + data222["toAddress"].toLowerCase()) || (data222["toAddress"].toLowerCase() == "any"))
+													tr["direction"] = "in";	
+										}
+											
+										
+										
+										if(chain == "tron")
+										{
+											ammountSent = parseInt(tr["value"])  *  (0.1 ** parseInt(tr["token_info"]["decimals"]));
+										}
+										else
+										{
+											ammountSent = parseInt(tr["value"])  *  (0.1 ** parseInt(tr["tokenDecimal"]));
+										}
+										
 										tr["ammountSent"] = ammountSent;
 									}
 							 
@@ -360,8 +607,16 @@ async function countDown(config){
 									//const API_ENDPOINT = "https://api.trongrid.io/v1/accounts/{address}/transactions/trc20";
 									//const CONTRACT_ADDRESS = "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t";
 									for (let i = 0; i < dddd["trans"].length; i++) {
+										
 									  console.log("dddd[trans][i] = " +  JSON.stringify(dddd["trans"][i]));
-									  if(dddd["trans"][i]["type"] == "Transfer")
+									  //document.getElementById('selected-data').innerHTML += "dddd['trans'].length = [" + dddd["trans"].length + "]";
+									  document.getElementById('selected-data').innerHTML += "dddd" + dddd.toString();
+									  if(chain == "tron")
+									  {
+										if(dddd["trans"][i]["type"] == "Transfer")
+											savedTrans.push(dddd["trans"][i])
+									  }
+									  else
 										savedTrans.push(dddd["trans"][i])
 									}
 									
@@ -664,10 +919,12 @@ async function countDown(config){
 			  
 			  
 			
-			document.getElementById('selected-data').innerHTML = "";			
+			//document.getElementById('selected-data').innerHTML = "";			
+			prpr("");
+			
 			const paragraph = document.getElementById("myParagraph");
 			//paragraph.innerHTML = "<p>All transactions!" + reqts[1]["fromAddress"] + "<br>" + resStr + "</p>";
-			paragraph.innerHTML = "<p>"+ "Total:" + sum + "<br>" + "<br>" + topSStr + "<br>First " + maxresStr + " transactions" + "<br>" + resStr + "</p>";
+			paragraph.innerHTML = "<p>"+ "TOTAL:" + sum + "<br>" + "<br>" + topSStr + "<br>First " + maxresStr + " transactions" + "<br>" + resStr + "</p>";
 			
 		} 
 		catch (error) {
