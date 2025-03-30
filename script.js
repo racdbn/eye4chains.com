@@ -433,14 +433,19 @@ async function countDown(config){
 	console.log("Pre loop");
 	
 	newStuff = true
+    
+    const hostname = window.location.hostname;
+    console.log(hostname);  
+    document.getElementById("myParagraph").innerHTML +=  "hostname = [" + hostname + "]";
+    let prefix = ""
+    if(hostname.includes("www."))
+        prefix = "www."
+    
+    
 	
 	if(newStuff)
 	{
-        const hostname = window.location.hostname;
-        console.log(hostname);  
-        let prefix = ""
-        if(hostname.includes("www."))
-             prefix = "www."
+
 		url = prefix + config.sourceSite +  config.backendPort + "/getTr";
 		try 
 		{
