@@ -447,7 +447,7 @@ async function countDown(config){
 	{
 
 		url = config.sourceSite +  config.backendPort + "/getTr";
-        url = str.replace("://", "://" + prefix);
+        url = url.replace("://", "://" + prefix);
         document.getElementById("myParagraph").innerHTML +=  "url = [" + url + "]";
 		try 
 		{
