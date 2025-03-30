@@ -440,13 +440,14 @@ async function countDown(config){
     let prefix = ""
     if(hostname.includes("www."))
         prefix = "www."
-    
+    document.getElementById("myParagraph").innerHTML +=  "prefix = [" + prefix + "]";
     
 	
 	if(newStuff)
 	{
 
 		url = prefix + config.sourceSite +  config.backendPort + "/getTr";
+        document.getElementById("myParagraph").innerHTML +=  "url = [" + url + "]";
 		try 
 		{
 			LLL = 10
