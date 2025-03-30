@@ -436,7 +436,12 @@ async function countDown(config){
 	
 	if(newStuff)
 	{
-		url = config.sourceSite +  config.backendPort + "/getTr";
+        const hostname = window.location.hostname;
+        console.log(hostname);  
+        let prefix = ""
+        if(hostname.includes("www."))
+             prefix = "www."
+		url = prefix + config.sourceSite +  config.backendPort + "/getTr";
 		try 
 		{
 			LLL = 10
