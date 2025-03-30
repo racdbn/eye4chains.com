@@ -446,7 +446,8 @@ async function countDown(config){
 	if(newStuff)
 	{
 
-		url = prefix + config.sourceSite +  config.backendPort + "/getTr";
+		url = config.sourceSite +  config.backendPort + "/getTr";
+        url = str.replace("://", "://" + prefix);
         document.getElementById("myParagraph").innerHTML +=  "url = [" + url + "]";
 		try 
 		{
