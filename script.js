@@ -1,3 +1,5 @@
+
+
 google.charts.load('current', {'packages':['corechart']});
 google.charts.setOnLoadCallback(drawChart);
  
@@ -70,50 +72,79 @@ async function getTransfersBlockscout(data)
 	if(chain == "optimism")
 		API_ENDPOINT = "https://optimism.blockscout.com/api";
 	
-	if(chain == "eth")
+	if(data["token"] == "token by contract address")
+		CONTRACT_ADDRESS = document.getElementById("tokenAddressInput").value.trim();
+	else
 	{
-		if(data["token"] == "usdt")
-			CONTRACT_ADDRESS = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
-		if(data["token"] == "usdc")
-			CONTRACT_ADDRESS = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
-	}	
-	if(chain == "base")
-	{
-		if(data["token"] == "usdt")
-			CONTRACT_ADDRESS = "0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2";
-		if(data["token"] == "usdc")
-			CONTRACT_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
-	}	
-	if(chain == "arbOne")
-	{
-		if(data["token"] == "usdt")
-			CONTRACT_ADDRESS = "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9";
-		if(data["token"] == "usdc")
-			CONTRACT_ADDRESS = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831";
-	}	
-	if(chain == "optimism")
-	{
-		if(data["token"] == "usdt")
-			CONTRACT_ADDRESS = "0x94b008aA00579c1307B0EF2c499aD98a8ce58e58";
-		if(data["token"] == "usdc")
-			CONTRACT_ADDRESS = "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85";
+		if(chain == "eth")
+		{
+			if(data["token"] == "usdt")
+				CONTRACT_ADDRESS = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
+			if(data["token"] == "usdc")
+				CONTRACT_ADDRESS = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
+		}	
+		if(chain == "base")
+		{
+			if(data["token"] == "usdt")
+				CONTRACT_ADDRESS = "0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2";
+			if(data["token"] == "usdc")
+				CONTRACT_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+		}	
+		if(chain == "arbOne")
+		{
+			if(data["token"] == "usdt")
+				CONTRACT_ADDRESS = "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9";
+			if(data["token"] == "usdc")
+				CONTRACT_ADDRESS = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831";
+		}	
+		if(chain == "optimism")
+		{
+			if(data["token"] == "usdt")
+				CONTRACT_ADDRESS = "0x94b008aA00579c1307B0EF2c499aD98a8ce58e58";
+			if(data["token"] == "usdc")
+				CONTRACT_ADDRESS = "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85";
+		}
 	}
 	
 	
 	address = data["fromAddress"];
 	
-	const params = new URLSearchParams({
-		module: "account",
-		action: "tokentx",
-		contractaddress: CONTRACT_ADDRESS,
-		address: "0x" + address,
-		page: 1,
-		offset: 1000,
-		//startblock: data['startblock'],
-		//endblock: data['endblock'],
-		sort: "desc",
-		only_confirmed: "true",
-	});
+	let params;
+ 
+	if((data["token"] !== "main token of the chain") && (token !== "main token of the chain (internal)"))
+	{
+		params = new URLSearchParams({
+			module: "account",
+			action: "tokentx",
+			contractaddress: CONTRACT_ADDRESS,
+			address: "0x" + address,
+			page: 1,
+			offset: 1000,
+			//startblock: data['startblock'],
+			//endblock: data['endblock'],
+			sort: "desc",
+			only_confirmed: "true",
+		});
+	}
+	else
+	{
+		let act;
+		if(data["token"] == "main token of the chain")
+			act = "txlist";
+		if(data["token"] == "main token of the chain (internal)")
+			act = "txlistinternal";
+		params = new URLSearchParams({
+			module: "account",
+			action: act,
+			address: "0x" + address,
+			page: 1,
+			offset: 1000,
+			//startblock: data['startblock'],
+			//endblock: data['endblock'],
+			sort: "desc",
+			only_confirmed: "true",
+		});		
+	}
 
 	
 	//document.getElementById('selected-data').innerHTML += "fromAddress = " + data["fromAddress"] + ",toAddress = " + data["toAddress"] + ","
@@ -145,40 +176,25 @@ async function getTransfersBlockscout(data)
             try {
 				params.set("page", page);
                 const url = `${API_ENDPOINT}?${params}`;
-                //const url = API_ENDPOINT + "?" + params.toString();
+ 
 				document.getElementById('selected-data').innerHTML += "page = [" + page + "]";
 				document.getElementById('selected-data').innerHTML += "url = [" + url + "]";
                 
                 const response = await fetch(url);
-				
-				//const data3333 = await response.json();
-				//datas.push(data3333);
+ 
 				
 
 				
 				
 				responses.push(response);
 
-				
-				//document.getElementById('selected-data').innerHTML += "response = [" + response + "]";
+		 
 				urls.push(url);
 				 
-				//document.getElementById('selected-data').innerHTML += "response = " + JSON.stringify(response.json());
 				console.log("response");
 				console.log(response);
 				
-
-				
-				
-                //if (!response.ok) 
-				//{
-                //    status1 = "response not .ok";
-                //    document.getElementById('selected-data').innerHTML += 
-                //        `Error: HTTP ${response.status}\n`;
-                //    retriesLeft--;
-                //    await sleepVen(210);
-                //    continue;
-                //}
+ 
 				
 
 
@@ -188,26 +204,7 @@ async function getTransfersBlockscout(data)
 				
                 dddd = predata.result || [];
 				datas.push(dddd);
-				//return {
-				//	trans: allTrans,
-				//	kickedByAPIReason: status1,
-				//	responses: responses,
-				//	datas: datas,
-				//	urls: urls
-				//};
-				//document.getElementById('selected-data').innerHTML += "dddd = " + JSON.stringify(dddd);
-				
-				
-				
-				//return {
-				//	trans: allTrans,
-				//	kickedByAPIReason: status1,
-				//	responses: responses,
-				//	datas: datas,
-				//	urls: urls
-				//};				
-				
-				//document.getElementById('selected-data').innerHTML += "PPPPPPPPPP"
+ 
 			
 				if(dddd.length == 0)
 				{
@@ -278,21 +275,41 @@ async function getTronTransfers(data) {
 	let CONTRACT_ADDRESS;
 	let API_ENDPOINT;
 	 
- 
-	API_ENDPOINT = "https://api.trongrid.io/v1/accounts/{address}/transactions/trc20";
+	if(data["token"] !== "main token of the chain")
+		API_ENDPOINT = "https://api.trongrid.io/v1/accounts/{address}/transactions/trc20";
+	else
+		API_ENDPOINT = "https://api.trongrid.io/v1/accounts/{address}/transactions";
+	 
+		
 	
 	if(data["token"] == "usdt")
 		CONTRACT_ADDRESS = "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t";
 	if(data["token"] == "usdc")
 		CONTRACT_ADDRESS = "TEkxiTehnzSmSe2XqrBj4w32RUN966rdz8";
+	if(data["token"] == "token by contract address")
+		CONTRACT_ADDRESS = document.getElementById("tokenAddressInput").value.trim();
 	
-	const params = new URLSearchParams({
-		contract_address: CONTRACT_ADDRESS,
-		limit: 200,
-		only_confirmed: "true",
-		min_timestamp: parseInt(data["startTimeStamp"]) * 1000,
-		max_timestamp: parseInt(data["endTimeStamp"]) * 1000
-	});
+	let params;
+	if(data["token"] !== "main token of the chain")
+	{
+		params = new URLSearchParams({
+			contract_address: CONTRACT_ADDRESS,
+			limit: 200,
+			only_confirmed: "true",
+			min_timestamp: parseInt(data["startTimeStamp"]) * 1000,
+			max_timestamp: parseInt(data["endTimeStamp"]) * 1000
+		});
+	}
+	else
+	{
+		params = new URLSearchParams({
+			limit: 200,
+			only_confirmed: "true",
+			min_timestamp: parseInt(data["startTimeStamp"]) * 1000,
+			max_timestamp: parseInt(data["endTimeStamp"]) * 1000,
+			search_internal: true
+		});		
+	}
 	
 	//document.getElementById('selected-data').innerHTML += "fromAddress = " + data["fromAddress"] + ",toAddress = " + data["toAddress"] + ","
 	//document.getElementById('selected-data').innerHTML += "DPASDJPOWSA"
@@ -310,7 +327,7 @@ async function getTronTransfers(data) {
  
 
     while (status1 !== "doneFetching") {
-        let retriesLeft = 3;
+        let retriesLeft = 1;
         status1 = "startingRequests";
         let dddd;
         while (retriesLeft > 0) {
@@ -505,17 +522,46 @@ async function countDown(config){
 			
 
 			
+
+			
 			//chains = ["eth"]
 			for(let ch = 0; ch < chains.length; ch++)
 			{
 				chain = chains[ch]
+				let tronWeb;
+				if(chain == "tron")
+				{
+					if(tokens2track == "main token of the chain")
+					{
+						tronWeb = new TronWeb({
+						  fullHost: 'https://api.trongrid.io'
+						  //,headers: { "TRON-PRO-API-KEY": "your-api-key" }
+						});
+					}
+				}
 				
 				if(tokens2track == "stables")
 					tokens = ["usdt", "usdc"]
 				else
 				{
-					tokens = []
-					tokens.push(tokens2track)
+					if(tokens2track == "main token of the chain")
+					{
+						if(chain == "tron")
+						{
+							tokens = ["main token of the chain"]
+						}
+						else
+						{
+							tokens = ["main token of the chain", "main token of the chain (internal)"]
+						}
+						//tokens = ["main token of the chain (internal)"]
+						//tokens = ["main token of the chain"]
+					}
+					else
+					{
+						tokens = []
+						tokens.push(tokens2track)
+					}
 				}
 				
 				for(let tt = 0; tt < tokens.length; tt++)
@@ -541,12 +587,15 @@ async function countDown(config){
 							endblock = 99999999999999;
 							let dddd = {"status": "not fetched"};
 
-									
+								// centralized processing for BSC and polygon	
 								if((chain !== "tron") && (chain !== "eth") && (chain !== "base")&& (chain !== "arbOne") && (chain !== "optimism")) 
 								{	
 									while(endblock > 0)
 									{
-										data222 = {fromAddress: fromAddress, toAddress: toAddress, chain: chain, endblock: endblock, endTimeStamp: endTimeStamp, startTimeStamp: startTimeStamp, "token": token};
+										tokenAddress = "";
+										if(token == "token by contract address")
+											tokenAddress = document.getElementById("tokenAddressInput").value.trim();
+										data222 = {fromAddress: fromAddress, toAddress: toAddress, chain: chain, endblock: endblock, endTimeStamp: endTimeStamp, startTimeStamp: startTimeStamp, "token": token, "tokenAddress": tokenAddress};
 										data222["source"] = "ETHERSCAN"
 										
 										
@@ -610,6 +659,48 @@ async function countDown(config){
 									for(let i = 0; i < dddd["trans"].length; i++)
 									{
 										tr = dddd["trans"][i];
+										
+										if((token !== "main token of the chain") && (token !== "main token of the chain (internal)"))
+										{
+											if(chain == "tron")
+											{
+												decimals = (0.1 ** parseInt(tr["token_info"]["decimals"]));
+											}
+											else
+											{
+												decimals = (0.1 ** parseInt(tr["tokenDecimal"]));
+											}
+										}
+										else
+										{
+											if(chain == "tron")
+											{
+
+												decimals = (0.1 ** 6);
+												if("raw_data" in tr)
+													if("contract" in tr["raw_data"])
+														if("type" in tr["raw_data"]["contract"][0])
+															if(tr["raw_data"]["contract"][0]["type"] == "TransferContract")
+																if("parameter" in tr["raw_data"]["contract"][0])
+																	if("value" in tr["raw_data"]["contract"][0]["parameter"])
+																		if("amount" in tr["raw_data"]["contract"][0]["parameter"]["value"])
+																		{
+																			tr["value"] = tr["raw_data"]["contract"][0]["parameter"]["value"]["amount"];
+																			tr["type"] = "Transfer";
+																			tr["from"] = tronWeb.address.fromHex(tr["raw_data"]["contract"][0]["parameter"]["value"]["owner_address"]);
+																			tr["to"] = tronWeb.address.fromHex(tr["raw_data"]["contract"][0]["parameter"]["value"]["to_address"]);
+																			tr["hash"] = tr["txID"];
+																		}
+																	
+															
+												
+											}
+											else
+											{
+												decimals = (0.1 ** 18);
+											}
+											
+										}										
 							 
 										if(chain == "tron")
 										{
@@ -635,15 +726,9 @@ async function countDown(config){
 										}
 											
 										
-										
-										if(chain == "tron")
-										{
-											ammountSent = parseInt(tr["value"])  *  (0.1 ** parseInt(tr["token_info"]["decimals"]));
-										}
-										else
-										{
-											ammountSent = parseInt(tr["value"])  *  (0.1 ** parseInt(tr["tokenDecimal"]));
-										}
+
+										ammountSent = parseInt(tr["value"])  *	decimals;
+
 										
 										tr["ammountSent"] = ammountSent;
 									}

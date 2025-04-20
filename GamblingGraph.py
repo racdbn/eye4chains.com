@@ -113,6 +113,9 @@ def getTr():
         
             
         if req["source"] == "ETHERSCAN":  
+            if(req["token"] == "token by contract address"):
+                tokenContract = req["tokenAddress"].lower()
+                
             if req["chain"] == "polygon":
                 if(req["token"] == "usdt"):
                     tokenContract = "0xc2132d05d31c914a87c6611c10748aeb04b58e8f".lower()
@@ -153,8 +156,18 @@ def getTr():
             url = "https://api.etherscan.io/v2/api"
             url = url + "?chainid=" + str(chainid)
             url = url + "&module=account"
-            url = url + "&action=tokentx"
-            url = url + "&contractaddress=" + tokenContract
+            
+            
+            if(req["token"] == "main token of the chain"):
+                url = url + "&action=txlist"
+            else: 
+              if(req["token"] == "main token of the chain (internal)"):
+                url = url + "&action=txlistinternal"
+              else:     
+                  url = url + "&action=tokentx"
+                  url = url + "&contractaddress=" + tokenContract
+                  
+               
             url = url + "&address=" + "0x" + req['fromAddress']
             url = url + "&page=1"
             url = url + "&offset=10000"
@@ -210,17 +223,26 @@ def getTr():
             printSMT("req[ toAddress ].lower() = " + req["toAddress"].lower())
             if  CorrectAddress:       
                 correctToken = False
-                if req["chain"] == "eth":
+                
+                if(req["token"] == "main token of the chain") or (req["token"] == "main token of the chain (internal)"):
                     correctToken = True
                 else:
-                    if(tr.get("contractAddress")== tokenContract):
+                    if req["chain"] == "eth":
                         correctToken = True
                     else:
-                        printSMT("tether ---")
+                        if(tr.get("contractAddress")== tokenContract):
+                            correctToken = True
+                        else:
+                            printSMT("tether ---")
  
                 if(correctToken):
                     printSMT("tether +++")
-                    ammountSent = int(tr['value'])  *  (0.1 ** int(tr['tokenDecimal']))
+                    
+                    if(req["token"] == "main token of the chain") or (req["token"] == "main token of the chain (internal)"):
+                        decimals = 18
+                    else:
+                        decimals = int(tr['tokenDecimal'])
+                    ammountSent = int(tr['value'])  *  (0.1 ** decimals)
                     printSMT("ammountSent = " + str(ammountSent))
                     
                     tmpSavedTrans.append(tr)

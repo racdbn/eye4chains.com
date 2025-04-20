@@ -64,7 +64,33 @@
 			<option value="usdt">usdt</option>
 			<option value="usdc">usdc</option>
 			<option value="stables"selected>stables</option>
+			<option value="token by contract address">token by contract address</option>
+			<option value="main token of the chain">main token of the chain</option>
 		</select>
+		
+		<div id="tokenAddressContainer" style="display: none; margin-top: 10px;">
+			<span>Input the token contract address: </span>
+			<input type="text" id="tokenAddressInput" 
+				   placeholder=""
+				   style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; 
+						  font-size: 14px; width: 500px;">
+		</div>
+
+		<script>
+		// Simple visibility toggle
+		document.getElementById('tokens2track').addEventListener('change', function() {
+			const container = document.getElementById('tokenAddressContainer');
+			container.style.display = this.value === 'token by contract address' ? 'block' : 'none';
+		});
+
+		// Get value anytime with this one-liner
+		//function getTokenAddress() {
+		//	return document.getElementById('tokenAddressInput')?.value.trim() || null;
+		//}
+
+		// Example usage:
+		// const address = getTokenAddress();
+		</script>
 
 		<style>
 			select {
@@ -92,6 +118,7 @@
 	<div id="selected-data"></div>
 	<p id="myParagraph"></p>
 	<script src="config.js"></script>
+	<script src="https://unpkg.com/tronweb@5.0.0/dist/TronWeb.js"></script>
 	<script src="script.js"></script>
 </body>
 </html>
