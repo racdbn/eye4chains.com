@@ -29,6 +29,8 @@ def printSMT(s):
     #print(ss)
     
 def printWLOG(logf,s):
+    if logf == None:
+        return
     print(s)  
     print(s, file=logf)
         
@@ -71,7 +73,8 @@ def getTr():
     now = datetime.now()
     
     tnow = now.strftime("%Y-%m-%d_%H-%M-%S")
-    log_file = open("..\\RacdbnLogs\\" + tnow + '.log', 'a')
+    log_file = None
+    #log_file = open("..\\RacdbnLogs\\" + tnow + '.log', 'a')
     
     while(True):
         if(len(savedTrans) > 10000):
@@ -285,7 +288,8 @@ def getTr():
     #print("sum = " + str(sum))
     
     printWLOG(log_file,"Sending shit to the client")
-    log_file.close()
+    if log_file != None:
+        log_file.close()
     if not toManyTrans:
         endblock = -1
     
