@@ -289,7 +289,7 @@ def getTr():
     
     printWLOG(log_file,"Sending shit to the client")
     if log_file != None:
-    log_file.close()
+        log_file.close()
     if not toManyTrans:
         endblock = -1
     
