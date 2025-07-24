@@ -29,9 +29,9 @@ def printSMT(s):
     #print(ss)
     
 def printWLOG(logf,s):
+    print(s)
     if logf == None:
         return
-    print(s)  
     print(s, file=logf)
         
     
@@ -289,7 +289,7 @@ def getTr():
     
     printWLOG(log_file,"Sending shit to the client")
     if log_file != None:
-        log_file.close()
+    log_file.close()
     if not toManyTrans:
         endblock = -1
     
